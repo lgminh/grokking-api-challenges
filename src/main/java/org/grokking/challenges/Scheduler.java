@@ -15,7 +15,7 @@ public class Scheduler {
     @Autowired
     private AsynchronousService checkAsyncService;
 
-    @Scheduled(fixedDelay = 1)
+    @Scheduled(fixedDelay = 1000)
     public void checkTheScedule() {
         checkAsyncService.executeAsynchronously();
     }
