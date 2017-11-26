@@ -1,4 +1,4 @@
-package org.challenges.grokking;
+package org.grokking.challenges;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

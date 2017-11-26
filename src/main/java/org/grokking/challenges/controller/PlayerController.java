@@ -1,4 +1,4 @@
-package org.challenges.grokking.Controller;
+package org.grokking.challenges.controller;
 
 /**
  * Created by daniel on 11/26/17.
