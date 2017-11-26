@@ -14,6 +14,7 @@ public class BackgroundWorker implements Runnable {
 
     public void run() {
         // get redis ranking with score
+        // add to sorted set & return
         LOGGER.info("Background worker is running...");
     }
 }
