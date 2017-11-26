@@ -1,4 +1,4 @@
-package org.challenges.grokking;
+package org.grokking.challenges;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

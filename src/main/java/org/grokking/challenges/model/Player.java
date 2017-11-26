@@ -1,4 +1,4 @@
-package org.challenges.grokking.Model;
+package org.grokking.challenges.model;
 
 /**
  * Created by daniel on 11/26/17.
