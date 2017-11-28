@@ -13,16 +13,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import org.grokking.challenges.services.RedisService;
 import org.grokking.challenges.model.Player;
 
+
 @RestController
 public class PlayerController {
-
     private static final String template = "Hello, %s!";
     private final AtomicLong counter = new AtomicLong();
-	public static final Logger logger = LoggerFactory.getLogger(PlayerController.class);
+	private static final Logger logger = LoggerFactory.getLogger(PlayerController.class);
+
 	@Autowired
 	RedisService redisService; //Service which will do all data retrieval/manipulation work
 
@@ -33,33 +39,45 @@ public class PlayerController {
 				String.format(template, name));
 	}
 
-
 	// -------------------Create a User-------------------------------------------
-	@RequestMapping(value = "/register", method = RequestMethod.POST)
-	public ResponseEntity<Void> createPlayer(@RequestBody Player player, UriComponentsBuilder Builder) {
-		logger.info("Creating User : {}", player);
+	@RequestMapping(value = "/register.json", method = RequestMethod.POST)
+	public ResponseEntity<String> createPlayer(@RequestParam String username, UriComponentsBuilder Builder) {
+		logger.info("Creating User : {}", username);
 
-		if (redisService.isplayerExist(player.getUsername())) {
-			logger.error("Unable to create. A User with name {} already exist", player);
-			return new ResponseEntity<Void>(HttpStatus.CONFLICT);
+		if (redisService.isplayerExist(username)) {
+			logger.error("Unable to create. A User with name {} already exist", username);
+			return new ResponseEntity<String>(HttpStatus.CONFLICT);
 		} else {
-			redisService.savePlayer(player.getUsername());
-			HttpHeaders headers = new HttpHeaders();
-			return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
+			try {
+				MessageDigest md = MessageDigest.getInstance("MD5");
+				String token = md.digest().toString();
+				Player player = redisService.savePlayer(username, token);
+				ResponseEntity<String> playerResponseEntity = new ResponseEntity<String>(token, HttpStatus.CREATED);
+				return playerResponseEntity;
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
 		}
+		return null;
 	}
 
 	// -------------------Submit score-------------------------------------------
-	@RequestMapping(value = "/submit", method = RequestMethod.POST)
-	public ResponseEntity<?> createPlayer(@RequestBody Long[] anwsers,
+	@RequestMapping(value = "/submit.json", method = RequestMethod.POST)
+	public ResponseEntity<?> createPlayer(@RequestBody Long[] answers,
 	  	@RequestHeader("X-User") String username,
   		@RequestHeader("X-Token") String token,
 	  UriComponentsBuilder Builder) {
 		HttpHeaders headers = new HttpHeaders();
 		if (redisService.isplayerExist(username)) {
-			redisService.updatescorePlayer(username, anwsers);
+			// simple authenticate
+			// need to rewrite later
+			if (redisService.authenticateUserToken(username, token)) {
+				redisService.updatescorePlayer(username, answers);
+			} else  {
+				return new ResponseEntity<Void>(headers, HttpStatus.FORBIDDEN);
+			}
 		} else {
-
+			return new ResponseEntity<Void>(headers, HttpStatus.FORBIDDEN);
 		}
 		return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
 	}
