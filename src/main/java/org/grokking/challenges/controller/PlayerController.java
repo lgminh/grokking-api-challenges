@@ -3,6 +3,7 @@ package org.grokking.challenges.controller;
 /**
  * Created by daniel on 11/26/17.
  */
+import org.grokking.challenges.services.RedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.concurrent.atomic.AtomicLong;
-import org.grokking.challenges.services.PlayerService;
+import org.grokking.challenges.services.RedisService;
 import org.grokking.challenges.model.Player;
 
 @RestController
@@ -23,7 +24,7 @@ public class PlayerController {
     private final AtomicLong counter = new AtomicLong();
 	public static final Logger logger = LoggerFactory.getLogger(PlayerController.class);
 	@Autowired
-	PlayerService playerService; //Service which will do all data retrieval/manipulation work
+	RedisService redisService; //Service which will do all data retrieval/manipulation work
 
 
 	@RequestMapping("/greeting")
@@ -34,19 +35,36 @@ public class PlayerController {
 
 
 	// -------------------Create a User-------------------------------------------
-	@RequestMapping(value = "/player/", method = RequestMethod.POST)
-	public ResponseEntity<?> createPlayer(@RequestBody player, UriComponentsBuilder Builder) {
+	@RequestMapping(value = "/register", method = RequestMethod.POST)
+	public ResponseEntity<Void> createPlayer(@RequestBody Player player, UriComponentsBuilder Builder) {
 		logger.info("Creating User : {}", player);
 
-		if (playerService.isplayerExist()) {
-			logger.error("Unable to create. A User with name {} already exist", player.getUsername());
-			return new ResponseEntity(String("Player named {}",player.getUsername()), HttpStatus.CONFLICT);
+		if (redisService.isplayerExist(player.getUsername())) {
+			logger.error("Unable to create. A User with name {} already exist", player);
+			return new ResponseEntity<Void>(HttpStatus.CONFLICT);
+		} else {
+			redisService.savePlayer(player.getUsername());
+			HttpHeaders headers = new HttpHeaders();
+			return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
 		}
-		playerService.savePlayer(player);
-		HttpHeaders headers = new HttpHeaders();
-		headers.setLocation(ucBuilder.path("/api/user/{id}").buildAndExpand(player.getId()).toUri());
-		return new ResponseEntity<String>(headers, HttpStatus.CREATED);
 	}
+
+	// -------------------Submit score-------------------------------------------
+	@RequestMapping(value = "/submit", method = RequestMethod.POST)
+	public ResponseEntity<?> createPlayer(@RequestBody Long[] anwsers,
+	  	@RequestHeader("X-User") String username,
+  		@RequestHeader("X-Token") String token,
+	  UriComponentsBuilder Builder) {
+		HttpHeaders headers = new HttpHeaders();
+		if (redisService.isplayerExist(username)) {
+			redisService.updatescorePlayer(username, anwsers);
+		} else {
+
+		}
+		return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
+	}
+
+
 }
 
 class Greeting {

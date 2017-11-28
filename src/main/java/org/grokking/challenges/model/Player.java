@@ -1,4 +1,9 @@
 package org.grokking.challenges.model;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.omg.CORBA.SetOverrideTypeHelper;
+
+import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Created by daniel on 11/26/17.
@@ -6,11 +11,17 @@ package org.grokking.challenges.model;
 public class Player {
 	private String username = "";
 	private long score = 0;
-
-	public Player(String username, long score){
+	private String token = "";
+	public Player(String username, long score, String token){
 		this.username = username;
 		this.score = 0;
+		this.token = token;
 	}
+
+	public Player(){
+
+	}
+
 
 	public long getScore(){
 		return this.score;
@@ -24,7 +35,7 @@ public class Player {
 		this.username = username;
 	}
 
-	public String getUsername(String username) {
+	public String getUsername() {
 		return username;
 	}
 
