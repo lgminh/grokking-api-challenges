@@ -2,11 +2,21 @@
 ##  Usage
 
     -Create user with username
-     -http://<host>/register.json?=username
-    Method: POST
-    params: username
+     -Endpoint: http://<host>/register.json?=username
+     -Method: POST
+     -Params: username
+     -Response: token for user
 
     -Submit answer
-     -http://<host>/submit.json
-     Method: POST
-     params: [data]
+     -Endpoint: http://<host>/submit.json
+     -Method: POST
+     -Params:
+        -Header:
+            X-User username
+            X-Token token
+        -Data: array of integer
+     -Response:
+            201 - Success
+            403 - Unauthorized
+
+
