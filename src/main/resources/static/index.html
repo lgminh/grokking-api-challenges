@@ -4,50 +4,123 @@
     <title>Hello WebSocket</title>
     <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="/main.css" rel="stylesheet">
-    <script src="/webjars/jquery/jquery.min.js"></script>
-    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
-    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
-    <script src="/app.js"></script>
 </head>
 <body>
-<noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
-    enabled. Please enable
-    Javascript and reload this page!</h2></noscript>
-<div id="main-content" class="container">
-    <div class="row">
-        <div class="col-md-6">
-            <form class="form-inline">
-                <div class="form-group">
-                    <label for="connect">WebSocket connection:</label>
-                    <button id="connect" class="btn btn-default" type="submit">Connect</button>
-                    <button id="disconnect" class="btn btn-default" type="submit" disabled="disabled">Disconnect
-                    </button>
-                </div>
-            </form>
-        </div>
-        <div class="col-md-6">
-            <form class="form-inline">
-                <div class="form-group">
-                    <label for="name">What is your name?</label>
-                    <input type="text" id="name" class="form-control" placeholder="Your name here...">
-                </div>
-                <button id="send" class="btn btn-default" type="submit">Send</button>
-            </form>
-        </div>
+<nav class="navbar navbar-default navbar-toggleable-md navbar-inverse bg-inverse">
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+            data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false"
+            aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" href="/">
+        <img class="logo" src="https://www.grokking.org/images/logo_resize.png">
+    </a>
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto"></ul>
+        <ul class="navbar-nav">
+            <li class="nav-item active">
+                <a class="nav-link" href="https://www.grokking.org/">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Link</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/scoreboard">Scoreboard</a>
+            </li>
+        </ul>
     </div>
-    <div class="row">
-        <div class="col-md-12">
-            <table id="conversation" class="table table-striped">
-                <thead>
-                <tr>
-                    <th>Greetings</th>
-                </tr>
-                </thead>
-                <tbody id="greetings">
-                </tbody>
-            </table>
-        </div>
+</nav>
+
+<!-- Main jumbotron for a primary marketing message or call to action -->
+<div class="jumbotron text-center">
+    <div class="container">
+        <h1 class="display-3">Welcome to Grokking Challenges!</h1>
+        <p>This is a template for a simple marketing or informational website. It includes a large callout called a
+            jumbotron and three supporting pieces of content. Use it as a starting point to create something more
+            unique.</p>
+        <p><a class="btn btn-primary btn-lg" href="#" role="button">Register &raquo;</a></p>
     </div>
 </div>
+
+<div class="container">
+    <!-- Example row of columns -->
+    <div class="row">
+        <div class="album text-muted">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12 col-md-4 card">
+                        <h1>#01</h1>
+                        <h1>Challenges Name</h1>
+                        <p class="card-text text-center">This is a wider card with supporting text below as a natural lead-in to
+                            additional content. This content is a little bit longer.</p>
+                    </div>
+                    <div class="col-sm-12 col-md-4 card">
+                        <h1>#01</h1>
+                        <h1>Challenges Name</h1>
+                        <p class="card-text text-center">This is a wider card with supporting text below as a natural lead-in to
+                            additional content. This content is a little bit longer.</p>
+                    </div>
+                    <div class="col-sm-12 col-md-4 card">
+                        <h1>#01</h1>
+                        <h1>Challenges Name</h1>
+                        <p class="card-text text-center">This is a wider card with supporting text below as a natural lead-in to
+                            additional content. This content is a little bit longer.</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 col-md-4 card">
+                        <h1>#01</h1>
+                        <h1>Challenges Name</h1>
+                        <p class="card-text text-center">This is a wider card with supporting text below as a natural lead-in to
+                            additional content. This content is a little bit longer.</p>
+                    </div>
+                    <div class="col-sm-12 col-md-4 card">
+                        <h1>#01</h1>
+                        <h1>Challenges Name</h1>
+                        <p class="card-text text-center">This is a wider card with supporting text below as a natural lead-in to
+                            additional content. This content is a little bit longer.</p>
+                    </div>
+                    <div class="col-sm-12 col-md-4 card">
+                        <h1>#01</h1>
+                        <h1>Challenges Name</h1>
+                        <p class="card-text text-center">This is a wider card with supporting text below as a natural lead-in to
+                            additional content. This content is a little bit longer.</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 col-md-4 card">
+                        <h1>#01</h1>
+                        <h1>Challenges Name</h1>
+                        <p class="card-text text-center">This is a wider card with supporting text below as a natural lead-in to
+                            additional content. This content is a little bit longer.</p>
+                    </div>
+                    <div class="col-sm-12 col-md-4 card">
+                        <h1>#01</h1>
+                        <h1>Challenges Name</h1>
+                        <p class="card-text text-center">This is a wider card with supporting text below as a natural lead-in to
+                            additional content. This content is a little bit longer.</p>
+                    </div>
+                    <div class="col-sm-12 col-md-4 card">
+                        <h1>#01</h1>
+                        <h1>Challenges Name</h1>
+                        <p class="card-text text-center">This is a wider card with supporting text below as a natural lead-in to
+                            additional content. This content is a little bit longer.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <footer>
+        <p>&copy; Company 2017</p>
+    </footer>
+</div>
+
+<script src="/webjars/jquery/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+<script src="/webjars/sockjs-client/sockjs.min.js"></script>
+<script src="/webjars/stomp-websocket/stomp.min.js"></script>
+<script src="/app.js"></script>
 </body>
 </html>
