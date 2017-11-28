@@ -13,6 +13,7 @@ public class BackgroundWorker implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(BackgroundWorker.class);
 
     public void run() {
+        // get redis ranking with score
         LOGGER.info("Background worker is running...");
     }
 }
