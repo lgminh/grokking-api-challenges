@@ -13,8 +13,7 @@ def import_primes():
                     if j != '':
                         t.append(j)
                 r.sadd("primes", t)
-                break
         file.close()
-
+    return 1
 if __name__ == '__main__':
     import_primes()
