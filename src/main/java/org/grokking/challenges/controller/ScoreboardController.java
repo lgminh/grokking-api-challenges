@@ -1,11 +1,15 @@
 package org.grokking.challenges.controller;
 
+import org.grokking.challenges.model.Result;
+import org.grokking.challenges.services.RedisService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by vinhdp on 27/11/17.
@@ -14,16 +18,18 @@ import java.util.List;
 @Controller
 public class ScoreboardController {
 
+    @Autowired
+    RedisService redisService;
+
     @RequestMapping("/scoreboard")
     public String getScoreboard(Model model) {
 
-        List<UserScore> lstScores = new ArrayList<UserScore>();
-        lstScores.add(new UserScore("vinhdangphuc@gmail.com", 10, 1, 50));
-        lstScores.add(new UserScore("vinhdangphuc1@gmail.com", 20, 2, 100));
-        lstScores.add(new UserScore("vinhdangphuc2@gmail.com", 30, 3, 150));
-        lstScores.add(new UserScore("vinhdangphuc3@gmail.com", 40, 4, 250));
+        List<Result> lstScores = redisService.getUserScores();
+        List<UserScore> results = lstScores.stream()
+                .map(r -> new UserScore(r.getEmail(), 0, 0, r.getScore()))
+                .collect(Collectors.toList());
 
-        model.addAttribute("lstScores", lstScores);
+        model.addAttribute("lstScores", results);
         return "scoreboard";
     }
 }

@@ -1,10 +1,16 @@
 package org.grokking.challenges.services;
 
 import org.grokking.challenges.model.Player;
+import org.grokking.challenges.model.Result;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.Tuple;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by vinhdp on 26/11/17.
@@ -56,4 +62,16 @@ public class RedisService {
 		}
 	}
 
+	public List<Result> getUserScores() {
+		Set<Tuple> scores = jedis.zrangeByScoreWithScores("ranking", "-inf", "+inf");
+		List<Result> results = new ArrayList<Result>();
+		scores.forEach(t -> {
+			String email = t.getElement();
+			Double score = t.getScore();
+
+			results.add(new Result(email, score.intValue()));
+		});
+
+		return results;
+	}
 }
