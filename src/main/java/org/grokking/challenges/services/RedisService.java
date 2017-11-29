@@ -1,5 +1,6 @@
 package org.grokking.challenges.services;
 
+import org.grokking.challenges.model.Challenge;
 import org.grokking.challenges.model.Player;
 import org.grokking.challenges.model.Result;
 import org.springframework.stereotype.Service;
@@ -8,9 +9,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Tuple;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by vinhdp on 26/11/17.
@@ -63,7 +62,7 @@ public class RedisService {
 	}
 
 	public List<Result> getUserScores() {
-		Set<Tuple> scores = jedis.zrangeByScoreWithScores("ranking", "-inf", "+inf");
+		Set<Tuple> scores = jedis.zrevrangeByScoreWithScores("ranking", "+inf", "-inf");
 		List<Result> results = new ArrayList<Result>();
 		scores.forEach(t -> {
 			String email = t.getElement();
@@ -74,4 +73,28 @@ public class RedisService {
 
 		return results;
 	}
+
+    public void setChallenge(Challenge challenge){
+        Map<String, String> mp = new HashMap<String, String>();
+        mp.put("id", String.valueOf(challenge.getId()));
+        mp.put("name", challenge.getName());
+        mp.put("date", String.valueOf(challenge.getDate()));
+        mp.put("startTime", String.valueOf(challenge.getStartTime()));
+        mp.put("endTime", String.valueOf(challenge.getEndTime()));
+
+        jedis.hmset("challenge" + challenge.getId(), mp);
+    }
+
+	public Challenge getChallenge(int number) {
+
+        Map<String, String> mp = jedis.hgetAll("challenge" + number);
+        String id = mp.get("id");
+        String name = mp.get("name");
+        String date = mp.get("date");
+        String startTime = mp.get("startTime");
+        String endTime = mp.get("endTime");
+
+        return new Challenge(Integer.valueOf(id), name, Long.valueOf(date),
+                Long.valueOf(startTime), Long.valueOf(endTime));
+    }
 }
