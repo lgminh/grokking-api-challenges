@@ -12,27 +12,27 @@ import redis.clients.jedis.JedisPoolConfig;
 
 @Service
 public class RedisService {
-	private static Jedis jedis;
+	private static JedisPool pool;
 	public RedisService(){
 		JedisPool pool = new JedisPool(new JedisPoolConfig(), "localhost");
-		jedis = pool.getResource();
 	}
 
-
 	public boolean isplayerExist(String username){
+		Jedis jedis = pool.getResource();
 		if (jedis.exists(username + "_list")) {
 			return jedis.exists(username + "_list");
 		} else {
 			return false;
 		}
-
     }
 
     public boolean authenticateUserToken(String username,String token) {
+		Jedis jedis = pool.getResource();
 		return jedis.get(username + "_token").equals(token);
 	}
 
 	public Player savePlayer(String username, String token){
+		Jedis jedis = pool.getResource();
 		Player player = new Player(username, 0, token);
 		jedis.sadd(username + "_list", "");
 		jedis.zadd("ranking", 0, username);
@@ -41,10 +41,12 @@ public class RedisService {
 	}
 
 	public boolean checkanswerExist(String username,Long answer){
+		Jedis jedis = pool.getResource();
 		return jedis.sismember( username + "_list", answer.toString());
 	}
 
 	public void updatescorePlayer(String username, Long[] answer){
+		Jedis jedis = pool.getResource();
 		double score = jedis.zscore("ranking", username);
 		//duplicate submit
 		int answer_length = answer.length <= 100 ? answer.length : 100;
@@ -63,5 +65,4 @@ public class RedisService {
 			jedis.zadd("ranking", score, username);
 		}
 	}
-
 }
