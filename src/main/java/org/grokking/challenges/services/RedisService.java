@@ -14,8 +14,10 @@ import redis.clients.jedis.JedisPoolConfig;
 public class RedisService {
 	private static Jedis jedis;
 	public RedisService(){
-		jedis = new Jedis("localhost",6379);
+		JedisPool pool = new JedisPool(new JedisPoolConfig(), "localhost");
+		jedis = pool.getResource();
 	}
+
 
 	public boolean isplayerExist(String username){
 		if (jedis.exists(username + "_list")) {
