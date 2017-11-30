@@ -18,7 +18,12 @@ public class RedisService {
 	}
 
 	public boolean isplayerExist(String username){
-		return jedis.exists(username + "_list");
+		if (jedis.exists(username + "_list")) {
+			return jedis.exists(username + "_list");
+		} else {
+			return false;
+		}
+
     }
 
     public boolean authenticateUserToken(String username,String token) {
@@ -40,7 +45,8 @@ public class RedisService {
 	public void updatescorePlayer(String username, Long[] answer){
 		double score = jedis.zscore("ranking", username);
 		//duplicate submit
-		for(int i = 0; i < answer.length; i++) {
+		int answer_length = answer.length <= 100 ? answer.length : 100;
+		for(int i = 0; i <  answer_length; i++) {
 			if (checkanswerExist(username, answer[i]) == true) {
 				score -= 1;
 			} else {
