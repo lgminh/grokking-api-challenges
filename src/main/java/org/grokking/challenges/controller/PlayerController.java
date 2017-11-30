@@ -3,6 +3,7 @@ package org.grokking.challenges.controller;
 /**
  * Created by daniel on 11/26/17.
  */
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.grokking.challenges.services.RedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.beans.Encoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -48,17 +50,15 @@ public class PlayerController {
 			logger.error("Unable to create. A User with name {} already exist", username);
 			return new ResponseEntity<String>(HttpStatus.CONFLICT);
 		} else {
-			try {
-				MessageDigest md = MessageDigest.getInstance("MD5");
-				String token = md.digest().toString();
-				Player player = redisService.savePlayer(username, token);
-				ResponseEntity<String> playerResponseEntity = new ResponseEntity<String>(token, HttpStatus.CREATED);
-				return playerResponseEntity;
-			} catch (NoSuchAlgorithmException e) {
-				e.printStackTrace();
-			}
+
+		SecureRandom random = new SecureRandom();
+		byte bytes[] = new byte[128];
+		random.nextBytes(bytes);
+		String token = Base64.encodeBase64String(bytes).toString();
+		Player player = redisService.savePlayer(username, token);
+		ResponseEntity<String> playerResponseEntity = new ResponseEntity<String>(token, HttpStatus.CREATED);
+		return playerResponseEntity;
 		}
-		return null;
 	}
 
 	// -------------------Submit score-------------------------------------------
