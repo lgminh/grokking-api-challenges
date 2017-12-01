@@ -21,11 +21,10 @@ public class RedisService {
 
 	public RedisService(){
 		JedisPoolConfig conf = new JedisPoolConfig();
-		conf.setMaxIdle(100);
-		conf.setMinIdle(50);
+		conf.setMaxIdle(512);
+		conf.setMinIdle(64);
+		conf.setMaxTotal(-1);
 		conf.setBlockWhenExhausted(false);
-		conf.setTestOnBorrow(true);
-		conf.setTestOnCreate(true);
 		pool = new JedisPool(conf, "localhost");
 	}
 
