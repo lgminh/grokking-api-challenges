@@ -14,21 +14,29 @@ import redis.clients.jedis.JedisPoolConfig;
 public class RedisService {
 	private static JedisPool pool;
 	public RedisService(){
-		JedisPool pool = new JedisPool(new JedisPoolConfig(), "localhost");
+		JedisPoolConfig config = new JedisPoolConfig();
+		config.setMaxTotal(32);
+		this.pool = new JedisPool(config, "localhost");
 	}
 
 	public boolean isplayerExist(String username){
 		Jedis jedis = pool.getResource();
 		if (jedis.exists(username + "_list")) {
-			return jedis.exists(username + "_list");
+			boolean exists =  jedis.exists(username + "_list");
+			jedis.close();
+			return exists;
+
 		} else {
+			jedis.close();
 			return false;
 		}
     }
 
     public boolean authenticateUserToken(String username,String token) {
 		Jedis jedis = pool.getResource();
-		return jedis.get(username + "_token").equals(token);
+		boolean authenticated =  jedis.get(username + "_token").equals(token);
+		jedis.close();
+		return authenticated;
 	}
 
 	public Player savePlayer(String username, String token){
@@ -37,6 +45,7 @@ public class RedisService {
 		jedis.sadd(username + "_list", "");
 		jedis.zadd("ranking", 0, username);
 		jedis.set(username + "_token", token);
+		jedis.close();
 		return player;
 	}
 
@@ -51,7 +60,7 @@ public class RedisService {
 		//duplicate submit
 		int answer_length = answer.length <= 100 ? answer.length : 100;
 		for(int i = 0; i <  answer_length; i++) {
-			if (checkanswerExist(username, answer[i]) == true) {
+			if (jedis.sismember( username + "_list", answer.toString())) {
 				score -= 1;
 			} else {
 				// prime number
@@ -64,5 +73,6 @@ public class RedisService {
 			}
 			jedis.zadd("ranking", score, username);
 		}
+		jedis.close();
 	}
 }
