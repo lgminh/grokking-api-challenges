@@ -2,6 +2,7 @@ package org.grokking.challenges.services;
 
 import org.grokking.challenges.workers.BackgroundWorker;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class AsynchronousService {
 
     @Autowired
+    @Qualifier("backgroundExecutor")
     private TaskExecutor taskExecutor;
 
     @Autowired
