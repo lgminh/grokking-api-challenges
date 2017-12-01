@@ -1,10 +1,15 @@
 package org.grokking.challenges.services;
 
+import org.grokking.challenges.model.Challenge;
 import org.grokking.challenges.model.Player;
+import org.grokking.challenges.model.Result;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.Tuple;
+
+import java.util.*;
 
 /**
  * Created by vinhdp on 26/11/17.
@@ -12,17 +17,22 @@ import redis.clients.jedis.JedisPoolConfig;
 
 @Service
 public class RedisService {
-	private static JedisPool pool;
+	private JedisPool pool;
+
 	public RedisService(){
-		JedisPoolConfig config = new JedisPoolConfig();
-		config.setMaxTotal(32);
-		this.pool = new JedisPool(config, "localhost");
+		JedisPoolConfig conf = new JedisPoolConfig();
+		conf.setMaxTotal(32);
+		conf.setMaxIdle(512);
+		conf.setMinIdle(64);
+		conf.setMaxTotal(-1);
+		conf.setBlockWhenExhausted(false);
+		this.pool = new JedisPool(conf, "localhost");
 	}
 
-	public boolean isplayerExist(String username){
+	public boolean isplayerExist(String username) {
 		Jedis jedis = pool.getResource();
 		if (jedis.exists(username + "_list")) {
-			boolean exists =  jedis.exists(username + "_list");
+			boolean exists = jedis.exists(username + "_list");
 			jedis.close();
 			return exists;
 
@@ -30,7 +40,7 @@ public class RedisService {
 			jedis.close();
 			return false;
 		}
-    }
+	}
 
     public boolean authenticateUserToken(String username,String token) {
 		Jedis jedis = pool.getResource();
@@ -50,29 +60,74 @@ public class RedisService {
 	}
 
 	public boolean checkanswerExist(String username,Long answer){
-		Jedis jedis = pool.getResource();
-		return jedis.sismember( username + "_list", answer.toString());
+		try (Jedis jedis = pool.getResource()) {
+			boolean isExisted = jedis.sismember(username + "_list", answer.toString());
+			jedis.close();
+			return isExisted;
+		}
 	}
 
 	public void updatescorePlayer(String username, Long[] answer){
-		Jedis jedis = pool.getResource();
-		double score = jedis.zscore("ranking", username);
-		//duplicate submit
-		int answer_length = answer.length <= 100 ? answer.length : 100;
-		for(int i = 0; i <  answer_length; i++) {
-			if (jedis.sismember( username + "_list", answer.toString())) {
-				score -= 1;
-			} else {
-				// prime number
-				if (jedis.sismember("primes", answer[i].toString())) {
-					score += 1;
-					jedis.sadd(username + "_list",answer[i].toString());
+		try (Jedis jedis = pool.getResource()) {
+			double score = jedis.zscore("ranking", username);
+			//duplicate submit
+			int answer_length = answer.length <= 100 ? answer.length : 100;
+			for (int i = 0; i < answer_length; i++) {
+				if (checkanswerExist(username, answer[i]) == true) {
+					score -= 1;
 				} else {
-					score -= 2;
+					// prime number
+					if (jedis.sismember("primes", answer[i].toString())) {
+						score += 1;
+						jedis.sadd(username + "_list", answer[i].toString());
+					} else {
+						score -= 2;
+					}
 				}
+				jedis.zadd("ranking", score, username);
 			}
-			jedis.zadd("ranking", score, username);
+			jedis.close();
 		}
-		jedis.close();
 	}
+
+	public List<Result> getUserScores() {
+		try (Jedis jedis = pool.getResource()) {
+			Set<Tuple> scores = jedis.zrevrangeByScoreWithScores("ranking", "+inf", "-inf");
+			List<Result> results = new ArrayList<Result>();
+			scores.forEach(t -> {
+				String email = t.getElement();
+				Double score = t.getScore();
+				results.add(new Result(email, score.intValue()));
+			});
+			jedis.close();
+			return results;
+		}
+	}
+
+    public void setChallenge(Challenge challenge){
+        Map<String, String> mp = new HashMap<String, String>();
+        mp.put("id", String.valueOf(challenge.getId()));
+        mp.put("name", challenge.getName());
+        mp.put("date", String.valueOf(challenge.getDate()));
+        mp.put("startTime", String.valueOf(challenge.getStartTime()));
+        mp.put("endTime", String.valueOf(challenge.getEndTime()));
+
+		Jedis jedis = pool.getResource();
+        jedis.hmset("challenge" + challenge.getId(), mp);
+    	jedis.close();
+	}
+
+	public Challenge getChallenge(int number) {
+		try (Jedis jedis = pool.getResource()) {
+			Map<String, String> mp = jedis.hgetAll("challenge" + number);
+			String id = mp.get("id");
+			String name = mp.get("name");
+			String date = mp.get("date");
+			String startTime = mp.get("startTime");
+			String endTime = mp.get("endTime");
+			jedis.close();
+			return new Challenge(Integer.valueOf(id), name, Long.valueOf(date),
+					Long.valueOf(startTime), Long.valueOf(endTime));
+		}
+    }
 }
