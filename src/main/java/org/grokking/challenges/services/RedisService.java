@@ -30,39 +30,38 @@ public class RedisService {
 	}
 
 	public boolean isplayerExist(String username) {
-		Jedis jedis = pool.getResource();
-		if (jedis.exists(username + "_list")) {
-			boolean exists = jedis.exists(username + "_list");
-			jedis.close();
-			return exists;
+		try (Jedis jedis = pool.getResource()) {
+			if (jedis.exists(username + "_list")) {
+				boolean exists = jedis.exists(username + "_list");
+				return exists;
 
-		} else {
-			jedis.close();
-			return false;
+			} else {
+				return false;
+			}
 		}
 	}
 
     public boolean authenticateUserToken(String username,String token) {
-		Jedis jedis = pool.getResource();
-		boolean authenticated =  jedis.get(username + "_token").equals(token);
-		jedis.close();
-		return authenticated;
+		try (Jedis jedis = pool.getResource()) {
+			boolean authenticated = jedis.get(username + "_token")
+					.equals(token);
+			return authenticated;
+		}
 	}
 
 	public Player savePlayer(String username, String token){
-		Jedis jedis = pool.getResource();
-		Player player = new Player(username, 0, token);
-		jedis.sadd(username + "_list", "");
-		jedis.zadd("ranking", 0, username);
-		jedis.set(username + "_token", token);
-		jedis.close();
-		return player;
+		try (Jedis jedis = pool.getResource()) {
+			Player player = new Player(username, 0, token);
+			jedis.sadd(username + "_list", "");
+			jedis.zadd("ranking", 0, username);
+			jedis.set(username + "_token", token);
+			return player;
+		}
 	}
 
 	public boolean checkanswerExist(String username,Long answer){
 		try (Jedis jedis = pool.getResource()) {
 			boolean isExisted = jedis.sismember(username + "_list", answer.toString());
-			jedis.close();
 			return isExisted;
 		}
 	}
@@ -86,7 +85,6 @@ public class RedisService {
 				}
 				jedis.zadd("ranking", score, username);
 			}
-			jedis.close();
 		}
 	}
 
@@ -99,7 +97,6 @@ public class RedisService {
 				Double score = t.getScore();
 				results.add(new Result(email, score.intValue()));
 			});
-			jedis.close();
 			return results;
 		}
 	}
@@ -112,9 +109,9 @@ public class RedisService {
         mp.put("startTime", String.valueOf(challenge.getStartTime()));
         mp.put("endTime", String.valueOf(challenge.getEndTime()));
 
-		Jedis jedis = pool.getResource();
-        jedis.hmset("challenge" + challenge.getId(), mp);
-    	jedis.close();
+		try (Jedis jedis = pool.getResource()) {
+			jedis.hmset("challenge" + challenge.getId(), mp);
+		}
 	}
 
 	public Challenge getChallenge(int number) {
@@ -125,7 +122,6 @@ public class RedisService {
 			String date = mp.get("date");
 			String startTime = mp.get("startTime");
 			String endTime = mp.get("endTime");
-			jedis.close();
 			return new Challenge(Integer.valueOf(id), name, Long.valueOf(date),
 					Long.valueOf(startTime), Long.valueOf(endTime));
 		}

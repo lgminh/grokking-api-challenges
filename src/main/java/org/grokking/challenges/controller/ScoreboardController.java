@@ -64,9 +64,9 @@ public class ScoreboardController {
     public Challenge createChallenge() {
 
         int duration = 90;
-        long date = LocalDate.of(2017, 11, 29)
+        long date = LocalDate.of(2017, 12, 2)
                 .atStartOfDay(zone).toEpochSecond() * 1000;
-        long startTime = LocalDateTime.of(2017, 11, 29, 22, 0, 0)
+        long startTime = LocalDateTime.of(2017, 12, 2, 9, 0, 0)
                 .atZone(zone).toEpochSecond() * 1000;
 
         long endTime = startTime + duration * 60 * 1000;

@@ -32,7 +32,7 @@ public class PlayerController {
 	private static final Logger logger = LoggerFactory.getLogger(PlayerController.class);
 
 	@Autowired
-	private static RedisService redisService = new RedisService(); //Service which will do all data retrieval/manipulation work
+	private RedisService redisService; //Service which will do all data retrieval/manipulation work
 
 
 	@RequestMapping("/greeting")
